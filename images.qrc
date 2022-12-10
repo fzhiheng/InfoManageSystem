@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/myIcon">
+        <file>icon/pdf.jpg</file>
+        <file>icon/icons8-file-32.png</file>
+        <file>icon/icons8-exe-24.png</file>
+        <file>icon/icons8-folder-30.png</file>
+        <file>icon/icons8-categorize-24.png</file>
+        <file>icon/icons8-opened-folder-48.png</file>
+        <file>icon/icons8-google-tag-manager-48.png</file>
+        <file>icon/icons8-image-32.png</file>
+        <file>icon/icons8-ct-32.png</file>
+        <file>icon/icons8-image-gallery-50.png</file>
+        <file>icon/icons8-jaw-64.png</file>
+        <file>icon/icons8-mri-50.png</file>
+        <file>icon/icons8-survey-50.png</file>
+        <file>icon/icons8-xray-32.png</file>
+        <file>icon/icons8-ct-scanner-48.png</file>
+        <file>icon/icons8-image-gallery-48.png</file>
+        <file>icon/icons8-jaw-642.png</file>
+        <file>icon/icons8-mri-48.png</file>
+        <file>icon/icons8-survey-100.png</file>
+        <file>icon/icons8-xray-48.png</file>
+        <file>icon/icons8-collectibles-48.png</file>
+        <file>icon/icons8-switches-50.png</file>
+        <file>icon/icons8-shazam-50.png</file>
+    </qresource>
+</RCC>

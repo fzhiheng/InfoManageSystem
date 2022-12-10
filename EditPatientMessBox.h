@@ -11,7 +11,6 @@
 #include <QDataStream>
 #include <QMessageBox>
 
-#include "PatienInfoBase.h"
 #include "Tool.h"
 
 

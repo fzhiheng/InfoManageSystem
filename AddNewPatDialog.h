@@ -1,5 +1,5 @@
-#ifndef ADDNEWPATBOX_H
-#define ADDNEWPATBOX_H
+#ifndef ADDNEWPATDIALOG_H
+#define ADDNEWPATDIALOG_H
 #include <QVector>
 #include <QWidget>
 #include <QLineEdit>
@@ -10,31 +10,31 @@
 #include <QVBoxLayout>
 #include <QDataStream>
 #include <QTextStream>
-#include <QFile>
-#include <QMessageBox>
-#include "infobase.h"
-#include "Tool.h"
+#include "GlobalVar.h"
+#include "patient.h"
 
 
-class AddNewPatBox: public QDialog
+class AddNewPatDialog: public QDialog
 {
     Q_OBJECT
 public:
-    AddNewPatBox();
+    AddNewPatDialog();
     void emitCloseBox();
 
 signals:
-    //自定义信号，当添加信息完成后，更新主界面上的表格
-    void closeBox();
+    void closeBox(Patient pat);
 
 public slots:
-    void savePatMess();
+    void addPatMess();
 
 private:
+
     QVector<QLineEdit*> add_info_opt;
     QPushButton * cancel;
     QPushButton * submit;
+    Patient m_pat;
+    QStringList info_add;
 
 };
 
-#endif // ADDNEWPATBOX_H
+#endif // ADDNEWPATDIALOG_H
