@@ -68,11 +68,14 @@ public slots:
     void ShowFileBox();
     void changePatFile(const QModelIndex &index,  const QModelIndex & pre);
     void flushTableBox(QString file_root);
-    void emitSignal(QString file_root){emit fileRootChange(file_root);}
-    void emitTableChangedSignal(){emit tableChanged();}
     void SetExePath(const QString file_name);
     void AutoMerge();
     void AutoClassify();
+
+public:
+    void emitSignal(QString file_root){emit fileRootChange(file_root);}
+    void emitTableChangedSignal(){emit tableChanged();}
+
 
 
 private:
@@ -101,16 +104,18 @@ private:
     QPushButton * ShowFileBtn;
 
 
-    QGroupBox * createMessBox();
-    QGroupBox * createFileBox();
-    void createMenu();
+    QGroupBox * initMessBox();
+    QGroupBox * initFileBox();
+    void initConnectSql(const QString &db_file, const QString &table_name);
+    void initExePath();
+    void initMenu();
+
     int get_selected_one_row();
     QList<int> get_selected_rows();
     QString fileRootHasBinded(const QString &file_root);
     QSet<QString> getSubFolders(QString path);
     bool patHasExist(const QString pat_name);
-    void connectSql(const QString &db_file, const QString &table_name);
-    void initExePath();
+
 
 
 

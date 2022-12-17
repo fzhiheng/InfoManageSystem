@@ -46,9 +46,12 @@ void PhotoWidget::change_show_img(int index){
 }
 
 void PhotoWidget::init_show_img(){
-    QImage* img=new QImage;
-    img->load(all_imgs_dir[0].absoluteFilePath());
-    this->all_viewers[0]->setPixmap(QPixmap::fromImage(*img));
+    if (all_imgs_dir.size()>0){
+        QImage* img=new QImage;
+        img->load(all_imgs_dir[0].absoluteFilePath());
+        this->all_viewers[0]->setPixmap(QPixmap::fromImage(*img));
+    }
+    return;
 }
 
 

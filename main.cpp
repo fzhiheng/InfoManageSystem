@@ -17,11 +17,13 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     QWidget widget;
+
 //    QString f = QFileDialog::getExistingDirectory(&widget, "sdaf");
 //    QSet<QString> t = getSubFolders(f);
 //    foreach(const QString dir, t){
 //        qDebug() << dir;
 //    }
+
     widget.setWindowIcon(QIcon(":/myIcon/icon/icons8-google-tag-manager-48.png"));
     widget.setWindowTitle("上海交通大学医学院附属第九人民医院-文件管理系统");
 

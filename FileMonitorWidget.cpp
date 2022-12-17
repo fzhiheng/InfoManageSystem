@@ -7,7 +7,7 @@
 FileMonitorWidget::FileMonitorWidget(const QString root_path, const QHash<QString, QString> &exe_map)
 {
     this->base_dir = QDir(root_path);
-    if(!this->base_dir.exists()){
+    if(!QFile::exists(root_path)){
         return;
     }
     icon_map.insert("photo",":/myIcon/icon/icons8-collectibles-48.png");
@@ -26,9 +26,13 @@ FileMonitorWidget::FileMonitorWidget(const QString root_path, const QHash<QStrin
     QStringList image_class = { "photo", "Xray"};
     foreach(const QString file_class, image_class){
         QString tmp_root = this->base_dir.absoluteFilePath(file_class);
-        if (QDir(tmp_root).exists()){
+        QDir tmp_dir = QDir(tmp_root);
+        tmp_dir.setFilter(QDir::NoDotAndDotDot);
+        if (QDir(tmp_root).exists() ){
             PhotoWidget *tmp_widget = new PhotoWidget(tmp_root);
-            this->addTab(tmp_widget,QIcon(icon_map.value(file_class)), file_class);
+            if (tmp_widget != nullptr){
+                this->addTab(tmp_widget,QIcon(icon_map.value(file_class)), file_class);
+            }
         }
     }
 

@@ -5,17 +5,18 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QDirIterator>
+#include <QFile>
 
 
 MessDispalyWidget::MessDispalyWidget(const QString &db_file, const QString &table_name){
 
-    connectSql(db_file, table_name);
+    initConnectSql(db_file, table_name);
     initExePath();
     QSplitter *mainwidget = new QSplitter(this);
 
-    QGroupBox *message_box = createMessBox();
-    QGroupBox *file_box = createFileBox();
-    createMenu();
+    QGroupBox *message_box = initMessBox();
+    QGroupBox *file_box = initFileBox();
+    initMenu();
     mainwidget->addWidget(file_box);
     mainwidget->addWidget(message_box);
     this->setCentralWidget(mainwidget);
@@ -94,16 +95,23 @@ void MessDispalyWidget::AutoClassify(){
         ROOT.setSorting(QDir::Name);
         QFileInfoList all_dirs = ROOT.entryInfoList();
         QStringList hasAdded;
+        QStringList hasBinded;
         QList<int> needAdd;
 
 
         for(int i=0; i<all_dirs.size(); ++i){
             QString pat_name = all_dirs.at(i).baseName();
+            QString add_dir = all_dirs.at(i).absoluteFilePath();
             if (this->patHasExist(pat_name)){
                 hasAdded<< pat_name;
                 continue;
             }else{
+                QString binded_pat_name = this->fileRootHasBinded(add_dir);
+                if (binded_pat_name!=""){
+                    hasBinded << add_dir;
+                }else{
                 needAdd.append(i);
+                }
             }
         }
 
@@ -130,6 +138,9 @@ void MessDispalyWidget::AutoClassify(){
         infoShow << "共添加：" << QString::number(this->m_model->rowCount()-maxcount)<<"条信息。";
         if (hasAdded.size()>0){
             infoShow << "\n跳过【" << hasAdded.join("、") << "】，因为表中已存在。" ;
+        }
+        if (hasBinded.size()>0){
+            infoShow << "\n跳过【" << hasBinded.join("、") << "】，因为路径已被绑定。" ;
         }
         QMessageBox::information(this,"提示",infoShow.join(""));
         returnAllTable();
@@ -192,7 +203,7 @@ void MessDispalyWidget::initExePath(){
 }
 
 
-void MessDispalyWidget::connectSql(const QString &db_file, const QString &table_name){
+void MessDispalyWidget::initConnectSql(const QString &db_file, const QString &table_name){
     if(QSqlDatabase::contains("qt_sql_default_connection")){
          m_db = QSqlDatabase::database("qt_sql_default_connection");
     }else{
@@ -215,7 +226,6 @@ void MessDispalyWidget::connectSql(const QString &db_file, const QString &table_
         qDebug()<<"查询失败";
         return;
     }
-
     m_model->setHeaderData(m_model->fieldIndex("name"),Qt::Horizontal,"姓名");
     m_model->setHeaderData(m_model->fieldIndex("sex"),Qt::Horizontal,"性别");
     m_model->setHeaderData(m_model->fieldIndex("age"),Qt::Horizontal,"年龄");
@@ -231,8 +241,7 @@ void MessDispalyWidget::connectSql(const QString &db_file, const QString &table_
     this->m_viewer->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->m_viewer->setColumnHidden(m_model->fieldIndex("file_root"), true);
     this->m_viewer->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //   QHeaderView *header = this->m_viewer->horizontalHeader();
-    //   header->setStretchLastSection(true);
+
 
     // 当表的内容有修改的时候，释放出修改信号
     QObject::connect(this,&MessDispalyWidget::tableChanged,this,&MessDispalyWidget::findPatMess);
@@ -240,7 +249,7 @@ void MessDispalyWidget::connectSql(const QString &db_file, const QString &table_
 }
 
 
-QGroupBox * MessDispalyWidget::createMessBox(){
+QGroupBox * MessDispalyWidget::initMessBox(){
     QGroupBox * box = new QGroupBox("病人信息");
     QVBoxLayout * layout = new QVBoxLayout();
     QGridLayout * Buts = new QGridLayout;
@@ -298,7 +307,9 @@ QGroupBox * MessDispalyWidget::createMessBox(){
 }
 
 
-QGroupBox * MessDispalyWidget::createFileBox(){
+QGroupBox * MessDispalyWidget::initFileBox(){
+
+
     QGroupBox * box = new QGroupBox("文件信息");
     FileMonitorWidget * file_widget = new FileMonitorWidget();
     this->m_file_layout =  new QVBoxLayout;
@@ -309,7 +320,7 @@ QGroupBox * MessDispalyWidget::createFileBox(){
 }
 
 
-void MessDispalyWidget::createMenu(){
+void MessDispalyWidget::initMenu(){
 
     QStatusBar *statusbar = new QStatusBar(this);
     this->setStatusBar(statusbar);
@@ -334,7 +345,7 @@ void MessDispalyWidget::createMenu(){
 
 
     QAction *autoClassify;
-    autoClassify = new QAction(QIcon(":/myIcon/icon/icons8-shazam-50.png"),"自动添加", this);
+    autoClassify = new QAction(QIcon(":/myIcon/icon/icons8-shazam-50.png"),"批量添加", this);
     autoClassify->setStatusTip("自动将根路径下的文件名作为病人名添加到表中，并绑定路径");
     file_menu->addAction(autoClassify);
     QObject::connect(autoClassify, &QAction::triggered, this, &MessDispalyWidget::AutoClassify);
@@ -365,7 +376,6 @@ void MessDispalyWidget::createMenu(){
 
 
 void MessDispalyWidget::changePatFile(const QModelIndex &index, const QModelIndex &){
-
     int row = index.row();
     QSqlRecord record = m_model->record(row);
     QString current_file_root = record.value("file_root").toString();
@@ -449,7 +459,7 @@ void MessDispalyWidget::DeleteFileBox(){
         if (!QDir(current_file_root).exists()){
             showinfo << "为无效路径";
         }
-        showinfo.append(",确定要删除吗？");
+        showinfo.append(",是否删除？");
         QMessageBox::StandardButton result=QMessageBox::question(this, "提示",showinfo.join(""));
         if(result == QMessageBox::No)
         {
@@ -527,6 +537,7 @@ void MessDispalyWidget::deleteData(){
     {
         m_model->submitAll();
         emitTableChangedSignal();
+        emitSignal("");
     }else{
         m_model->revertAll();//回退，注意，只有在保存策略是OnManualSubmit时有用
     }
@@ -627,9 +638,8 @@ QString MessDispalyWidget::fileRootHasBinded(const QString &file_root){
     {
         QSqlRecord record = m_model->record(i);
         QString hasBindedRoot = record.value("file_root").toString();
-        QSet<QString> hasBinded = getSubFolders(hasBindedRoot);
 
-        if(file_root==hasBindedRoot || hasBinded.contains(file_root))
+        if(file_root==hasBindedRoot || getSubFolders(hasBindedRoot).contains(file_root))
         {
             return record.value("name").toString();
         }
@@ -643,7 +653,7 @@ QSet<QString> MessDispalyWidget::getSubFolders(QString path)
     //判断路径是否存在
     QSet<QString> result;
     QDir dir(path);
-    if(!dir.exists()){
+    if(path == "" || !dir.exists()){
         return result;
     }
 
